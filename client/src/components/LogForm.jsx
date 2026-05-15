@@ -8,13 +8,47 @@ export default function LogForm() {
     solutionCode: "",
   });
 
+  // New State: Tracks the exact status of the network request
+  const [status, setStatus] = useState("System Ready");
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Transmission payload:", formData);
+    setStatus("Transmitting...");
+
+    try {
+      // THE BRIDGE: Sending the POST request to your Express server
+      const response = await fetch("http://localhost:5000/api/dsaLogs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setStatus("Log Secured");
+
+        // Clear the form to prepare for the next entry
+        setFormData({
+          title: "",
+          topic: "",
+          difficulty: "Easy",
+          solutionCode: "",
+        });
+
+        // Reset the UI status back to normal after 3 seconds
+        setTimeout(() => setStatus("System Ready"), 3000);
+      } else {
+        setStatus("Transmission Failed");
+      }
+    } catch (error) {
+      console.error("Network Error:", error);
+      setStatus("Connection Refused");
+    }
   };
 
   return (
@@ -27,8 +61,13 @@ export default function LogForm() {
           </p>
         </div>
         <div className="status-indicator">
-          <span className="pulse-dot"></span>
-          <span className="status-text">System Ready</span>
+          {/* Dynamic pulse color based on network status */}
+          <span
+            className={
+              status === "Transmitting..." ? "pulse-dot active" : "pulse-dot"
+            }
+          ></span>
+          <span className="status-text">{status}</span>
         </div>
       </div>
 
@@ -89,8 +128,12 @@ export default function LogForm() {
         </div>
 
         <div className="action-row">
-          <button type="submit" className="primary-btn">
-            Commit to Vault
+          <button
+            type="submit"
+            className="primary-btn"
+            disabled={status === "Transmitting..."}
+          >
+            {status === "Transmitting..." ? "Encrypting..." : "Commit to Vault"}
           </button>
         </div>
       </form>
