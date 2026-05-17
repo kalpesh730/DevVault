@@ -1,5 +1,6 @@
 import "./index.css";
 import LogForm from "./components/LogForm";
+import LogFeed from "./components/LogFeed";
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
 
         <main className="main-content">
           <LogForm />
+
+          {/* THE NEW FEED COMPONENT */}
+          <div className="divider"></div>
+          <LogFeed />
         </main>
       </div>
     </div>
