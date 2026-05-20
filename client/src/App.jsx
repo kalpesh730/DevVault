@@ -1,29 +1,29 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
-import LogForm from "./components/LogForm";
-import LogFeed from "./components/LogFeed";
+
+// Components & Pages
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./pages/Dashboard";
+import Analytics from "./pages/Analytics";
 
 function App() {
   return (
-    <div className="app-wrapper">
-      <div className="ambient-glow"></div>
+    <BrowserRouter>
+      <div className="app-wrapper">
+        <div className="ambient-glow"></div>
 
-      <div className="dashboard-container">
-        <header className="brand-header">
-          <h1 className="brand-title">
-            DevVault<span className="brand-accent">.</span>
-          </h1>
-          <p className="brand-tagline">Centralized Developer Intelligence</p>
-        </header>
+        <div className="app-layout">
+          <Sidebar />
 
-        <main className="main-content">
-          <LogForm />
-
-          {/* THE NEW FEED COMPONENT */}
-          <div className="divider"></div>
-          <LogFeed />
-        </main>
+          <main className="main-viewport">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/analytics" element={<Analytics />} />
+            </Routes>
+          </main>
+        </div>
       </div>
-    </div>
+    </BrowserRouter>
   );
 }
 
