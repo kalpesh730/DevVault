@@ -4,7 +4,6 @@ export default function LogFeed() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Automatically fetch data when the component loads
   useEffect(() => {
     fetchLogs();
   }, []);
@@ -18,6 +17,24 @@ export default function LogFeed() {
     } catch (error) {
       console.error("Failed to fetch logs:", error);
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    // 1. Send the destruct signal to the backend
+    try {
+      const response = await fetch(`http://localhost:5000/api/dsaLogs/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        // 2. Instantly remove it from the UI without refreshing
+        setLogs(logs.filter((log) => log._id !== id));
+      } else {
+        console.error("Failed to delete from vault");
+      }
+    } catch (error) {
+      console.error("Network error during deletion:", error);
     }
   };
 
@@ -48,12 +65,21 @@ export default function LogFeed() {
           logs.map((log) => (
             <div key={log._id} className="log-card">
               <div className="log-card-header">
-                <h3>{log.title}</h3>
-                <span
-                  className={`difficulty-badge ${log.difficulty.toLowerCase()}`}
+                <div className="title-group">
+                  <h3>{log.title}</h3>
+                  <span
+                    className={`difficulty-badge ${log.difficulty.toLowerCase()}`}
+                  >
+                    {log.difficulty}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDelete(log._id)}
+                  className="destructive-btn"
+                  title="Purge Record"
                 >
-                  {log.difficulty}
-                </span>
+                  Purge
+                </button>
               </div>
               <div className="log-meta">
                 <span className="topic-tag">{log.topic}</span>

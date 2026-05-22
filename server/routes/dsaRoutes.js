@@ -32,5 +32,18 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Server Error: Could not fetch logs." });
   }
 });
+// DELETE: Destroy a log by its MongoDB ID
+router.delete('/:id', async (req, res) => {
+  try {
+    const deletedLog = await DsaLog.findByIdAndDelete(req.params.id);
+    if (!deletedLog) {
+      return res.status(404).json({ message: 'Record not found in vault' });
+    }
+    res.status(200).json({ message: 'Execution log permanently destroyed' });
+  } catch (error) {
+    console.error("Destruction Error:", error);
+    res.status(500).json({ message: 'Server failed to delete record' });
+  }
+});
 
 module.exports = router;
