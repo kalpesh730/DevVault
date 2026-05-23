@@ -548,3 +548,48 @@ input:focus, select:focus, textarea:focus {
 .destructive-btn:active {
   transform: scale(0.95);
 }
+/* --- DEV-014: Filter Control Panel --- */
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.search-bar {
+  flex: 1;
+  padding: 0.85rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px rgba(100, 108, 255, 0.2);
+}
+
+.search-bar::placeholder {
+  color: var(--text-secondary);
+}
+
+.difficulty-dropdown {
+  padding: 0.85rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  min-width: 160px;
+}
+
+.difficulty-dropdown:focus {
+  border-color: var(--accent-primary);
+}
