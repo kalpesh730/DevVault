@@ -7,6 +7,8 @@ export default function LogFeed() {
   // DEV-014: Search and Filter State Engines
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState('All');
+  const [analyzingId, setAnalyzingId] = useState(null);
+  const [aiFeedback, setAiFeedback] = useState({});
 
   useEffect(() => {
     fetchLogs();
@@ -36,7 +38,26 @@ export default function LogFeed() {
       console.error("Network error during deletion:", error);
     }
   };
+  const handleAnalyze = async (id, title, code) => {
+    setAnalyzingId(id);
+    try {
+      const response = await fetch("http://localhost:5000/api/ai/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, code }),
+      });
 
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the feedback attached to this specific log ID
+        setAiFeedback((prev) => ({ ...prev, [id]: data.analysis }));
+      }
+    } catch (error) {
+      console.error("AI connection failed:", error);
+    }
+    setAnalyzingId(null);
+  };
   // DEV-014: The Filter Logic (Runs instantly on every keystroke)
   const filteredLogs = logs.filter((log) => {
     const matchesSearch = log.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -67,16 +88,16 @@ export default function LogFeed() {
 
       {/* DEV-014: The Control Panel */}
       <div className="filter-controls">
-        <input 
-          type="text" 
-          placeholder="Search algorithms or topics (e.g., Arrays, Sort)..." 
+        <input
+          type="text"
+          placeholder="Search algorithms or topics (e.g., Arrays, Sort)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="search-bar"
           spellCheck="false"
         />
-        <select 
-          value={difficultyFilter} 
+        <select
+          value={difficultyFilter}
           onChange={(e) => setDifficultyFilter(e.target.value)}
           className="difficulty-dropdown"
         >
@@ -98,12 +119,14 @@ export default function LogFeed() {
               <div className="log-card-header">
                 <div className="title-group">
                   <h3>{log.title}</h3>
-                  <span className={`difficulty-badge ${log.difficulty.toLowerCase()}`}>
+                  <span
+                    className={`difficulty-badge ${log.difficulty.toLowerCase()}`}
+                  >
                     {log.difficulty}
                   </span>
                 </div>
-                <button 
-                  onClick={() => handleDelete(log._id)} 
+                <button
+                  onClick={() => handleDelete(log._id)}
                   className="destructive-btn"
                   title="Purge Record"
                 >
@@ -113,16 +136,97 @@ export default function LogFeed() {
               <div className="log-meta">
                 <span className="topic-tag">{log.topic}</span>
                 <span className="date-tag">
-                  {new Date(log.date).toLocaleDateString('en-US', {
-                    month: 'short', day: 'numeric', year: 'numeric'
+                  {new Date(log.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
                   })}
                 </span>
               </div>
               <div className="code-preview">
-                <pre><code>{log.solutionCode}</code></pre>
+                <pre>
+                  <code>{log.solutionCode}</code>
+                </pre>
               </div>
             </div>
           ))
+        )}
+      </div>
+      <div key={log._id} className="log-card">
+        <div className="log-card-header">
+          <div className="title-group">
+            <h3>{log.title}</h3>
+            <span
+              className={`difficulty-badge ${log.difficulty.toLowerCase()}`}
+            >
+              {log.difficulty}
+            </span>
+          </div>
+          <div
+            className="action-group"
+            style={{ display: "flex", gap: "0.5rem" }}
+          >
+            <button
+              onClick={() =>
+                handleAnalyze(log._id, log.title, log.solutionCode)
+              }
+              className="primary-btn"
+              style={{ padding: "0.4rem 0.8rem", fontSize: "0.75rem" }}
+              disabled={analyzingId === log._id}
+            >
+              {analyzingId === log._id ? "Analyzing..." : "AI Review"}
+            </button>
+            <button
+              onClick={() => handleDelete(log._id)}
+              className="destructive-btn"
+              title="Purge Record"
+            >
+              Purge
+            </button>
+          </div>
+        </div>
+        <div className="log-meta">
+          <span className="topic-tag">{log.topic}</span>
+          <span className="date-tag">
+            {new Date(log.date).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </span>
+        </div>
+        <div className="code-preview">
+          <pre>
+            <code>{log.solutionCode}</code>
+          </pre>
+        </div>
+
+        {/* DEV-015: AI Feedback Window */}
+        {aiFeedback[log._id] && (
+          <div
+            className="ai-feedback-window"
+            style={{
+              marginTop: "1rem",
+              padding: "1rem",
+              background: "rgba(100, 108, 255, 0.05)",
+              border: "1px solid rgba(100, 108, 255, 0.2)",
+              borderRadius: "8px",
+              color: "var(--text-secondary)",
+              fontSize: "0.85rem",
+              whiteSpace: "pre-wrap",
+            }}
+          >
+            <div
+              style={{
+                color: "var(--accent-primary)",
+                fontWeight: "600",
+                marginBottom: "0.5rem",
+              }}
+            >
+              ✦ AI Architecture Review
+            </div>
+            {aiFeedback[log._id]}
+          </div>
         )}
       </div>
     </div>
